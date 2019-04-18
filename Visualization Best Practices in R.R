@@ -216,3 +216,173 @@ ggplot(md_speeding) +
     aes(x=percentage_over_limit),
     bins=40,     # set bin number to 40
     alpha=0.8)    # reduce alpha to 0.8
+
+
+ggplot(md_speeding) +
+  geom_histogram(
+    aes(x = percentage_over_limit),
+    bins = 100 ,         # switch to 100 bins
+    fill=  'steelblue',               # set the fill of the bars to 'steelblue'
+    alpha = 0.8 )
+
+
+
+ggplot(md_speeding,aes(x = hour_of_day)) +
+  geom_histogram(
+    binwidth = 1,  # set binwidth to 1
+    center = 0.5  # Center bins at the half (0.5) hour
+  ) +
+  scale_x_continuous(breaks = 0:24)
+
+
+# filter data to just heavy duty trucks
+truck_speeding <- md_speeding %>% 
+  filter(vehicle_type == "Heavy Duty Truck")
+
+ggplot(truck_speeding, aes(x = hour_of_day)) +
+  # switch to density with bin width of 1.5, keep fill 
+  geom_density(fill = 'steelblue',bw=1.5) +
+  # add a subtitle stating binwidth
+  labs(title = 'Citations by hour',subtitle= "Gaussian kernel SD = 1.5")
+
+
+ggplot(truck_speeding, aes(x = hour_of_day)) +
+  # Adjust opacity to see gridlines with alpha = 0.7
+  geom_density(bw = 1.5, fill = 'steelblue', alpha = 0.7) +
+  # add a rug plot using geom_rug to see individual datapoints, set alpha to 0.5.
+  geom_rug(alpha = 0.5) +
+  labs(title = 'Citations by hour', subtitle = "Gaussian kernel SD = 1.5")
+
+
+ggplot(md_speeding, aes(x = percentage_over_limit)) +
+  # Increase bin width to 2.5
+  geom_density(fill = 'steelblue', bw = 2.5,  alpha = 0.7) + 
+  # lower rugplot alpha to 0.05
+  geom_rug(alpha = 0.05) + 
+  labs(
+    title = 'Distribution of % over speed limit', 
+    # modify subtitle to reflect change in kernel width
+    subtitle = "Gaussian kernel SD = 2.5"
+  )
+
+
+md_speeding %>% 
+  filter(vehicle_color == 'RED') %>%
+  # Map x and y to gender and speed columns respectively
+  ggplot(aes(x= gender,y=speed)) + 
+  # add a boxplot geometry
+  geom_boxplot() +
+  # give plot supplied title
+  labs(title = 'Speed of red cars by gender of driver')
+
+
+md_speeding %>% 
+  filter(vehicle_color == 'RED') %>%
+  ggplot(aes(x = gender, y = speed)) + 
+  # add jittered points with alpha of 0.3 and color 'steelblue'
+  geom_jitter(alpha=0.3,color='steelblue') +
+  # make boxplot transparent with alpha = 0
+  geom_boxplot(alpha=0) +
+  labs(title = 'Speed of red cars by gender of driver')
+
+
+# remove color filter
+md_speeding %>% 
+  ggplot(aes(x = gender, y = speed)) + 
+  geom_jitter(alpha = 0.3, color = 'steelblue') +
+  geom_boxplot(alpha = 0) +
+  # add a facet_wrap by vehicle_color
+  facet_wrap(~vehicle_color) +
+  # change title to reflect new faceting
+  labs(title = 'Speed of different car colors, separated by gender of driver')
+
+
+# Load library for making beeswarm plots
+library(ggbeeswarm)
+
+md_speeding %>% 
+  filter(vehicle_color == 'RED') %>%
+  ggplot(aes(x = gender, y = speed)) + 
+  # change point size to 0.5 and alpha to 0.8
+  geom_beeswarm(cex = 0.5, alpha=0.8) +
+  # add a transparent boxplot on top of points
+  geom_boxplot(alpha=0)
+
+
+
+md_speeding %>% 
+  filter(vehicle_color == 'RED') %>%
+  ggplot(aes(x = gender, y = speed)) + 
+  # Replace beeswarm geometry with a violin geometry with kernel width of 2.5
+  geom_violin(bw=2.5) +
+  # add individual points on top of violins
+  geom_point( alpha = 0.3, size = 0.5)
+
+
+md_speeding %>% 
+  filter(vehicle_color == 'RED') %>%
+  ggplot(aes(x = gender, y = speed)) + 
+  geom_violin(bw = 2.5) +
+  # add a transparent boxplot and shrink its width to 0.3
+  geom_boxplot(alpha=0,width=0.3) +
+  # Reset point size to default and set point shape to 95
+  geom_point(alpha = 0.3, shape = 95) +
+  # Supply a subtitle detailing the kernel width
+  labs(subtitle = 'Gaussian kernel SD = 2.5')
+
+
+
+md_speeding %>% 
+  ggplot(aes(x = gender, y = speed)) + 
+  # replace with violin plot with kernel width of 2.5, change color argument to fill 
+  geom_violin(bw=2.5, fill = 'steelblue') +
+  # reduce width to 0.3
+  geom_boxplot(width = 0.3) +
+  facet_wrap(~vehicle_color) +
+  labs(
+    title = 'Speed of different car colors, separated by gender of driver',
+    # add a subtitle w/ kernel width
+    subtitle= 'Gaussian kernel width: 2.5'
+  )
+
+
+library(ggridges)
+
+md_speeding %>% 
+  mutate(day_of_week = factor(day_of_week, levels = c("Mon","Tues","Wed","Thu","Fri","Sat","Sun") )) %>% 
+  ggplot(aes( x = percentage_over_limit, y = day_of_week)) + 
+  # Set bandwidth to 3.5
+  geom_density_ridges(bandwidth = 3.5) +
+  # add limits of 0 to 150 to x-scale
+  scale_x_continuous(limits=c(0,150)) + 
+  # provide subtitle with bandwidth
+  labs(
+    subtitle = 'Gaussian kernel SD = 3.5')
+
+
+
+md_speeding %>% 
+  mutate(day_of_week = factor(day_of_week, levels = c("Mon","Tues","Wed","Thu","Fri","Sat","Sun") )) %>% 
+  ggplot(aes( x = percentage_over_limit, y = day_of_week)) + 
+  # make ridgeline densities a bit see-through with alpha = 0.7
+  geom_density_ridges(bandwidth = 3.5, alpha = 0.7) +
+  # set expand values to c(0,0)
+  scale_x_continuous(limits = c(0,150), expand = c(0,0)) +
+  labs(subtitle = 'Guassian kernel SD = 3.5') +
+  # remove y axis ticks
+  theme(axis.ticks.y=element_blank())
+
+
+md_speeding %>% 
+  mutate(day_of_week = factor(day_of_week, levels = c("Mon","Tues","Wed","Thu","Fri","Sat","Sun") )) %>% 
+  ggplot(aes( x = percentage_over_limit, y = day_of_week)) + 
+  geom_point(alpha = 0.2,shape = '|',position = position_nudge(y = -0.05)
+             # make semi-transparent with alpha = 0.2
+             # turn points to vertical lines with shape = '|'
+             # nudge the points downward by 0.05
+  ) +
+  geom_density_ridges(bandwidth = 3.5, alpha = 0.7) +
+  scale_x_continuous(limits = c(0,150), expand  = c(0,0)) +
+  labs(subtitle = 'Guassian kernel SD = 3.5') +
+  theme( axis.ticks.y = element_blank() )
+
